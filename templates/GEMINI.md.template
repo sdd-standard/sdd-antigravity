@@ -1,0 +1,41 @@
+# {{PROJECT_NAME}} — Contexto do Projeto
+
+{{DESCRICAO_CURTA}}
+
+Stack: {{STACK}}
+
+## Metodologia: Spec-Driven Development (plugin sdd-workflow)
+
+A fonte da verdade é `docs/sdd/`. O código expressa a especificação, nunca a substitui.
+
+- `docs/sdd/constitution.md` — princípios inegociáveis do projeto. Valide TUDO contra ela.
+- `docs/sdd/specs/` — estado atual consolidado (artefatos 00–10).
+- `docs/sdd/changes/` — mudanças ativas (proposal + delta-spec + tasks).
+- `docs/sdd/11-project-memory.md` — estado de salvamento entre sessões.
+
+## Protocolo de início de sessão (OBRIGATÓRIO)
+
+Leia nesta ordem antes de trabalhar: constitution → 11-project-memory → 10-validation → tasks Pending/In Progress. Confirme estado e próximo passo em até 5 linhas.
+
+## Regras de execução
+
+- Nunca implemente código sem task com Status `In Progress` rastreável a um FR/NFR.
+- Atualize Status da task ao iniciar (`In Progress`) e concluir (`Done`), no mesmo turno.
+- Atualize `11-project-memory.md` a cada evento (artefato aprovado, decisão travada, task mudou de status). Máx. 150 linhas, sobrescreva.
+- Requisitos em GEARS: `[Where][While][When] the <subject> shall <behavior>`. Keywords sempre em inglês.
+- Ambiguidade → `PENDENTE DE DEFINIÇÃO` + `10-validation.md`. Nunca invente requisito crítico.
+- Mudanças pós-baseline via `sdd-change`, nunca edição direta das specs.
+- SEMPRE confirme com o usuário antes de instalar dependências.
+- Ao fechar um milestone: rode a guarda mecânica `node "scripts/check-ids.mjs" .` (siglas órfãs) e o gate com `sdd-validate` antes de avançar.
+- Critical/High bloqueiam avanço, salvo dívida aceita explicitamente pelo usuário.
+
+## Fluxo por fase
+
+| Fase | Skill Antigravity |
+|---|---|
+| Bootstrap (novo/existente) | `sdd-init` · `sdd-adopt` |
+| Domain→Design→Roadmap | `sdd-design` |
+| Tasks→Ledger | `sdd-tasks` |
+| Executar task | `sdd-implement` |
+| Validação / Quality Gate | `sdd-validate` |
+| Mudança/feature (Delta Spec) | `sdd-change` |

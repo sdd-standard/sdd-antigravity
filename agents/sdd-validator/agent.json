@@ -1,0 +1,4 @@
+{
+  "name": "sdd-validator",
+  "description": "Subagente auditor de SDD. Não altera código, apenas lê as specs e o código real, e relata divergências."
+}
