@@ -1,6 +1,6 @@
 {
   "name": "sdd-workflow",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "description": "Spec-Driven Development (SDD) plugin for Antigravity IDE. Operacionaliza o fluxo de desenvolvimento guiado por especificação.",
   "author": {
     "name": "Maurissi"

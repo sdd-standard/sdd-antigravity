@@ -82,9 +82,9 @@ Você também pode declarar o plugin explicitamente no arquivo `.agents/plugins.
 
 | Componente | Conteúdo | Papel no SDD |
 |---|---|---|
-| `skills/` (7) | `sdd-init`, `sdd-adopt`, `sdd-change`, `sdd-design`, `sdd-tasks`, `sdd-implement`, `sdd-validate` | Habilidades executadas sob demanda pelo Gemini (`SKILL.md`) com Progressive Disclosure. |
+| `skills/` (8) | `sdd-init`, `sdd-adopt`, `sdd-specify`, `sdd-change`, `sdd-design`, `sdd-tasks`, `sdd-implement`, `sdd-validate` | Habilidades executadas sob demanda pelo Gemini (`SKILL.md`) com Progressive Disclosure. |
 | `rules/` | `sdd-core-rules.md` | Regras globais (`always_on`) que garantem os 11 princípios, sintaxe GEARS e impedem modificação de código sem task `In Progress`. |
-| `agents/` | `sdd-validator/` | Subagente auditor isolado. Não altera código; aponta divergências (`arquivo:linha`) contra as specs e registra débitos no gate. |
+| `agents/` (3) | `sdd-architect/`, `sdd-validator/`, `sdd-doc-writer/` | Architect: cérebro das fases de especificação e design. Validator: auditor blindado (read-only), aponta divergências com severidade. Doc-writer: redator de README e docs de features. |
 | `hooks.json` | `sdd-session-start` (`PreInvocation`) | Injeta automaticamente a memória viva (`11-project-memory.md`) e status de tasks (`07-tasks.md`) no início de cada sessão (P11). |
 | `templates/` | Templates completos para Constitution, Specs 00–10, `GEMINI.md`, delta-spec, proposal e memory. | Esqueletos que as skills copiam e adaptam ao inicializar projetos. |
 | `scripts/` | `session-start.mjs`, `check-ids.mjs` | Automações determinísticas de contexto e validação mecânica de rastreabilidade de IDs. |
@@ -100,7 +100,9 @@ Peça ao assistente no Antigravity:
 O assistente executará a entrevista da **Constitution**, gerará a árvore inicial `docs/sdd/` com as regras e criará `GEMINI.md` e `.agents/rules/sdd-project-rules.md` para governança editável do projeto.
 
 Fluxo seguinte:
-`sdd-design` ➔ `sdd-tasks` ➔ `sdd-implement` ➔ `sdd-validate` ➔ `sdd-change`.
+`sdd-specify` ➔ `sdd-design` ➔ `sdd-tasks` ➔ `sdd-implement` ➔ `sdd-change`.
+
+> **Nota:** A validação (quality gate) ocorre automaticamente ao fechar milestones dentro da skill `sdd-implement`. A skill `sdd-validate` está disponível para validações manuais a qualquer momento.
 
 ---
 

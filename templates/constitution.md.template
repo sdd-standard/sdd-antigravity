@@ -18,4 +18,8 @@ Princípios inegociáveis. Toda spec, design, task e código é validado contra 
 <!-- git flow, política de docs, regra de instalação de deps, aprovações -->
 
 ## 6. Roteamento de modelos (economia de tokens)
-- Documentação: haiku · Codificação/testes: sonnet · Arquitetura/orquestração: opus
+<!-- Preencher durante a entrevista do sdd-init com os modelos disponíveis no ambiente do usuário.
+     Exemplos Gemini: Flash (docs/tarefas rápidas) · Pro (código/testes) · Pro Thinking (arquitetura).
+     Exemplos Claude: Haiku (docs) · Sonnet (código/testes) · Opus (arquitetura).
+     O agente deve perguntar ao usuário quais modelos ele possui e preencher abaixo. -->
+- Documentação: {{MODEL_DOCS}} · Codificação/testes: {{MODEL_CODE}} · Arquitetura/orquestração: {{MODEL_ARCH}}

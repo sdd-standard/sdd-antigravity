@@ -1,0 +1,4 @@
+{
+  "name": "sdd-doc-writer",
+  "description": "Redator de documentação SDD. Use para atualizar README.md e criar docs de funcionalidade (versão usuário final + versão técnica com diagramas) após tasks concluídas."
+}

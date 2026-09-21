@@ -17,15 +17,20 @@ async function main() {
   }
 
   const workspace = input.workspacePaths?.[0] || process.cwd();
-  
-  // We only care about injecting at the very beginning of the loop or session.
-  // We can do it on every invocation, but ephemeralMessages are transient.
-  
-  const memoryPath = path.join(workspace, 'docs', 'sdd', '11-project-memory.md');
-  const tasksPath = path.join(workspace, 'docs', 'sdd', '07-tasks.md');
+
+  const sddRoot = path.join(workspace, 'docs', 'sdd');
+  if (!fs.existsSync(sddRoot)) {
+    // Projeto sem SDD: silencioso
+    console.log(JSON.stringify({ injectSteps: [] }));
+    return;
+  }
+
+  const memoryPath = path.join(sddRoot, '11-project-memory.md');
+  const tasksPath = path.join(sddRoot, '07-tasks.md');
 
   const injectSteps = [];
 
+  // Camada 1: Memory (always inject — it's the index/pointer for everything)
   if (fs.existsSync(memoryPath)) {
     const memory = fs.readFileSync(memoryPath, 'utf8');
     injectSteps.push({
@@ -33,11 +38,26 @@ async function main() {
     });
   }
 
+  // Camada 1: Tasks — filtered to active only (Pending/In Progress/Blocked), max 15
+  // Token-efficient: does NOT load changes/*/tasks.md (those are loaded on-demand by skills)
   if (fs.existsSync(tasksPath)) {
     const tasks = fs.readFileSync(tasksPath, 'utf8');
-    injectSteps.push({
-      ephemeralMessage: "SDD Context: Current Tasks status:\n```markdown\n" + tasks + "\n```"
-    });
+    const blocks = tasks.split(/\n(?=TASK-)/);
+    const active = blocks
+      .filter(b => /Status:\s*(Pending|In Progress|Blocked)/i.test(b))
+      .map(b => {
+        const id = b.match(/TASK-\d+/)?.[0] || '?';
+        const title = b.match(/Title:\s*(.+)/)?.[1]?.trim() || '?';
+        const status = b.match(/Status:\s*(.+)/)?.[1]?.trim() || '?';
+        return `- ${id} [${status}] ${title}`;
+      })
+      .slice(0, 15);
+
+    if (active.length > 0) {
+      injectSteps.push({
+        ephemeralMessage: `SDD Context: Tasks não concluídas (${active.length}):\n${active.join("\n")}\n\nSiga o protocolo: confirme estado e próximo passo em até 5 linhas antes de agir.`
+      });
+    }
   }
 
   console.log(JSON.stringify({ injectSteps }));
