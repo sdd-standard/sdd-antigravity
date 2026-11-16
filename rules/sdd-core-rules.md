@@ -21,7 +21,7 @@ Este projeto opera sob a metodologia **Spec-Driven Development (SDD Puro v2.1)**
 - **P8 — Tarefas derivam dos artefatos**: Nenhuma tarefa nasce do nada; cada task no `07-tasks.md` aponta para um requisito ou decisão.
 - **P9 — Validação é gate contínuo e 100% passivo**: Cada fase é validada antes de avançar. Ao fechar milestones, o Quality Gate Passivo em 3 Camadas audita o código real sem jamais alterá-lo, reportando divergências para o implementador corrigir.
 - **P10 — SDD não é Waterfall**: Especificar o suficiente para reduzir risco incrementalmente, aprender e consolidar.
-- **P11 — Estado fora do chat (Engenharia de Contexto e Paginação Elástica)**: O chat é volátil. TODO o estado, decisões e tarefas residem em arquivos versionados (`docs/sdd/`). A memória entre sessões vive em `11-project-memory.md` e as dívidas ativas em `10-validation.md` (teto de 150 linhas por arquivo, máximo de 4–5 linhas por parágrafo, com paginação elástica `-02.md` quando necessário e auto-exclusão ao sanar pendências).
+- **P11 — Estado fora do chat (Engenharia de Contexto e Paginação Elástica)**: O chat é volátil. TODO o estado, decisões e tarefas residem em arquivos versionados (`docs/sdd/`). A memória entre sessões vive em `11-project-memory.md` e as dívidas ativas em `10-validation.md` (gatilho de paginação de 150 linhas ou 7.000/16.000 caracteres, com paginação elástica `-02.md` quando necessário e auto-exclusão ao sanar pendências).
 
 ---
 
@@ -82,18 +82,25 @@ Todo achado de validação (`VAL-xxx`) deve ser classificado combinando esta mat
 ## 4. Regras Estritas de Execução e Governança (v2.1)
 
 1. **NUNCA modifique código sem uma task `In Progress`**: O arquivo `docs/sdd/07-tasks.md` (ou `tasks.md` da delta-spec) é o ledger de execução. Não gere código se a tarefa não estiver formalmente ativa e rastreada a um requisito.
-2. **Mudanças pós-baseline são Delta Specs**: Após a baseline inicial de specs (`00` a `11`), NUNCA edite diretamente os arquivos centrais. Use o ciclo de vida de mudanças (`sdd-change`):
+2. **Mudanças pós-baseline são Delta Specs**: Após a baseline inicial, NUNCA edite diretamente os artefatos de baseline (`00`–`06`, `08` e `09`). Os artefatos voláteis (`07-tasks.md`, `10-validation.md`, `11-project-memory.md`) continuam sendo atualizados a cada evento. Toda alteração, por menor ou mais urgente que seja (não existe atalho de "hotfix"), usa o ciclo de vida de mudanças (`sdd-change`):
    - `proposal.md` ➔ `delta-spec.md` (seções ADDED / MODIFIED / REMOVED em GEARS) ➔ `tasks.md` ➔ Implementação ➔ Gate Passivo ➔ Consolidação nas specs e arquivamento em `archive/`.
 3. **Entrevista Escopada, Baixa Fricção e Fatiamento de Escopo**:
    - Em projetos existentes, o entrevistador (`sdd-architect`) inspeciona **apenas** os arquivos do domínio/módulo em pauta (jamais o repositório inteiro de uma vez).
    - Faz poucas perguntas cirúrgicas (máx. 3–5) sempre acompanhadas de uma opção recomendada.
    - Se detectar que a mudança solicitada é grande demais, sugere proativamente fragmentar em múltiplas changes ou estreitar a change atual e registrar o excedente como dívida ativa/escopo futuro em `10-validation.md` ou `06-roadmap.md`.
 4. **Quality Gate 100% Passivo em 3 Camadas**:
-   - **Camada 0 (Piso Mecânico Passivo):** `check-ids.mjs` (rastreabilidade de IDs) + comprovação de execução de testes com `exit code 0` após a última edição de código (*Say-Do Gate*).
+   - **Camada 0 (Piso Mecânico Passivo):** `check-ids.mjs` (rastreabilidade de IDs) + `say-do-audit.mjs` (*Say-Do Gate*: lê o ledger gravado pelo hook `PostToolUse` e comprova execução de testes com `exit code 0` após a última edição de código).
+   - *Curto-circuito:* se a Camada 0 falhar, o validador não é acionado até o piso estar limpo. `NO_EVIDENCE` no `say-do-audit.mjs` não é aprovação: rode o comando oficial de testes e re-audite.
    - **Camada 1 (Validador Passivo — Estágio 1):** Conformidade estrita GEARS e `AC-xxx` (sem omissões e sem *scope creep*).
    - **Camada 2 (Validador Passivo — Estágio 2):** Qualidade arquitetural, `constitution.md` e interações com infra global.
    - *Regra de Ouro:* Nenhuma das 3 camadas altera arquivos; todas apenas reportam divergências para o implementador corrigir.
 5. **Paginação Elástica com Auto-Exclusão (*Overflow Sharding*)**:
-   - Nunca crie parágrafos gigantescos de uma única linha para burlar o teto de 150 linhas de `10-validation.md` ou `11-project-memory.md`.
-   - Se o volume de dívidas/memória ativa ultrapassar 150 linhas (com parágrafos de até 4–5 linhas), crie `10-validation-02.md` ou `11-project-memory-02.md`, referencie-o no topo do arquivo principal e **exclua o arquivo `-02.md` assim que as pendências forem sanadas** e o conteúdo voltar a caber no arquivo principal.
-6. **Confirmação de dependências**: SEMPRE peça permissão explícita ao usuário antes de adicionar bibliotecas ou dependências ao projeto.
+   - Gatilho de paginação: **150 linhas OU 7.000 caracteres** em `11-project-memory.md` (injetado na sessão) e **150 linhas OU 16.000 caracteres** em `10-validation.md`, o que vier primeiro.
+   - Nunca resuma nem corte uma dívida para caber: cada `VAL` mantém os campos obrigatórios do template (`Issue`, `Evidence`, `Impact`, `Recommendation`, `Closure Criteria`, `History`); dívida com frentes independentes é fragmentada em `VAL` filhas (`Parent:`).
+   - Atingido o gatilho por conteúdo ativo legítimo, crie `10-validation-02.md` ou `11-project-memory-02.md`, referencie-o no topo do arquivo principal e **exclua o arquivo `-02.md` assim que as pendências forem sanadas** e o conteúdo voltar a caber no arquivo principal.
+6. **Ciclo de Maturidade (`Draft → Reviewed → Approved`)**:
+   - Só o usuário muda o `Status` de um artefato (aprovação em bloco é permitida); o agente nunca se autopromove.
+   - Nenhuma fase avança sobre artefato abaixo de `Reviewed`. Consumir artefato `Reviewed` ainda não `Approved` abre dívida de maturidade no `10-validation.md` (`Type: Maturity`, snapshot dos IDs e do texto consumidos). Na aprovação: snapshot igual → fecha sem alteração; diferente → revalide os dependentes antes de fechar.
+   - Um item (`FR`, `NFR`, `DES`, `AC`, item de delta) só é `Auto-Approved` se não tocar as seções 4 e 6 da constitution, derivar 1:1 de item aprovado pelo usuário (ou aplicar convenção escrita na constitution) e trouxer `Motivo:`. Liste os `Auto-Approved` ao pedir a aprovação do artefato.
+7. **Aceite de Risco pelo Usuário**: `Critical`/`High` aberto só deixa de bloquear com aceite do usuário (nunca do agente), registrado na `VAL` com quem, data, justificativa e gatilho de revisão. A severidade original é mantida. Falha da Camada 0 não é aceitável; aceitar violação da constitution exige registrar a exceção na seção 8 dela.
+8. **Confirmação de dependências**: SEMPRE peça permissão explícita ao usuário antes de adicionar bibliotecas ou dependências ao projeto.

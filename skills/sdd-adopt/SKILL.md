@@ -15,17 +15,17 @@ Esta skill cria a fundação SDD em projetos que já existem mas não tinham doc
 3. Liste em até 3 a 5 perguntas diretas (com recomendação padrão) apenas o que NÃO dá para inferir dos manifestos (SLAs, regras de negócio implícitas, decisões históricas).
 
 ## Fase 2 — Constitution Extraída + Entrevista
-4. Entreviste o usuário para formalizar as convenções na `constitution.md` em duas partes: (a) convenções OBSERVADAS no código — confirme com o usuário; (b) regras DESEJADAS daqui em diante.
+4. Entreviste o usuário para formalizar as convenções na `constitution.md` em duas partes: (a) convenções OBSERVADAS no código — confirme com o usuário; (b) regras DESEJADAS daqui em diante (incluindo o comando oficial de testes usado pelo *Say-Do Gate*); (c) **Calibração de criticidade do domínio** (seção 6): o que, neste negócio, eleva um achado automaticamente para `Critical` ou `High` (ex.: precisão financeira, PII/LGPD, auditoria regulatória) e o que é tolerado como `Medium`/`Low` nesta fase.
 
 ## Fase 3 — Baseline Mínima "As-Built" (Estrutura Flat em `docs/sdd/`)
-5. Crie a estrutura canônica em `docs/sdd/` utilizando os modelos de `templates/specs/` e `templates/archive/`:
+5. Crie a estrutura canônica em `docs/sdd/` utilizando os modelos de `templates/specs/` e `templates/archive/` (todo caminho `templates/...` desta skill é relativo à `<raiz-do-plugin>`, informada pelo hook do plugin no início de cada turno):
    - `constitution.md` — governança extraída + desejada (`templates/constitution.md.template`).
    - `00-project-brief.md` — o que o sistema é hoje e por que existe (`templates/specs/00-project-brief.md`).
    - `02-spec.md` — capacidades atuais em alto nível (sem GEARS retroativo; seção `"As-Built"`).
    - `04-domain-model.md` — mapa dos *bounded contexts* e linguagem ubíqua observada.
    - `05-design.md` — arquitetura *as-built* + decisões conhecidas (marque históricas como `"legado"`).
    - `07-tasks.md` — ledger vazio (`templates/specs/07-tasks.md`).
-   - `10-validation.md` — lacunas e dívidas conhecidas (`templates/specs/10-validation.md`, com suporte a paginação elástica `10-validation-02.md` se > 150 linhas).
+   - `10-validation.md` — lacunas e dívidas conhecidas (`templates/specs/10-validation.md`, com suporte a paginação elástica `10-validation-02.md` ao atingir o gatilho de paginação).
    - `11-project-memory.md` — estado inicial (`templates/specs/11-project-memory.md`, com suporte a paginação elástica `11-project-memory-02.md`).
    - `changes/` — pasta vazia para futuras mudanças.
    - `archive/validation-log.md` — log de débitos (`templates/archive/validation-log.md`, vazio).

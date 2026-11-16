@@ -6,5 +6,18 @@
         "command": "node ./scripts/session-start.mjs"
       }
     ]
+  },
+  "sdd-say-do-record": {
+    "PostToolUse": [
+      {
+        "matcher": "run_command|write_to_file|replace_file_content|multi_replace_file_content",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ./scripts/say-do-record.mjs"
+          }
+        ]
+      }
+    ]
   }
 }

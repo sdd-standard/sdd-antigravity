@@ -17,7 +17,7 @@ Enquanto a programação conversacional (*vibe coding*) proporciona uma velocida
 O **SDD Puro v2.1** canaliza o poder do Gemini em torno de artefatos vivos e versionados:
 - **A especificação é a fonte da verdade (P1/P2)**: Mudanças começam sempre na spec (`docs/sdd/`), governada pela `constitution.md`.
 - **Entrevista Escopada, Baixa Fricção e Fatiamento de Escopo**: O arquiteto (`sdd-architect`) inspeciona **apenas** o código do domínio em pauta (jamais varre o repositório inteiro), realiza diagnóstico de `Validate-Gap`, faz poucas perguntas cirúrgicas com recomendação padrão e sugere fragmentar ou estreitar *changes* grandes demais.
-- **Engenharia de Contexto com Paginação Elástica (P11)**: O estado da sessão é injetado silenciosamente no início de cada invocação via hooks (`session-start.mjs`), com teto de 150 linhas por arquivo, parágrafos curtos (máx. 4–5 linhas) e suporte nativo a transbordo estruturado (`10-validation-02.md`, `11-project-memory-02.md`) que se auto-exclui quando as pendências são sanadas.
+- **Engenharia de Contexto com Paginação Elástica (P11)**: O estado da sessão é injetado silenciosamente no início de cada invocação via hooks (`session-start.mjs`), com gatilho de paginação de 150 linhas ou 7.000/16.000 caracteres por arquivo (sem cortar o conteúdo das dívidas) e suporte nativo a transbordo estruturado (`10-validation-02.md`, `11-project-memory-02.md`) que se auto-exclui quando as pendências são sanadas.
 - **Quality Gate 100% Passivo em 3 Camadas**:
   - **Camada 0 (Piso Mecânico Passivo):** Guarda determinística de IDs (`check-ids.mjs`) + comprovação de testes executados com `exit code 0` após a última edição.
   - **Camadas 1 e 2 (`sdd-validator` 100% Read-Only):** Auditoria dividida em **Estágio 1 (Conformidade Estrita GEARS e Anti-Scope-Creep)** e **Estágio 2 (Qualidade, Constitution e Infra Global)**. Nenhuma camada do gate edita arquivos — apenas reporta divergências para o implementador corrigir.
@@ -88,9 +88,9 @@ Você também pode declarar o plugin explicitamente no arquivo `.agents/plugins.
 | `skills/` (8) | `sdd-init`, `sdd-adopt`, `sdd-specify`, `sdd-change`, `sdd-design`, `sdd-tasks`, `sdd-implement`, `sdd-validate` | Habilidades executadas sob demanda pelo Gemini (`SKILL.md`) com Progressive Disclosure. |
 | `rules/` | `sdd-core-rules.md` | Regras globais (`always_on`) que garantem os 11 princípios, sintaxe GEARS, paginação elástica e impedem modificação de código sem task `In Progress`. |
 | `agents/` (3) | `sdd-architect/`, `sdd-validator/`, `sdd-doc-writer/` | Architect: especificação, entrevista escopada e design. Validator: auditor 100% passivo (`read-only`) em 2 estágios. Doc-writer: redator de README e docs de features. |
-| `hooks.json` | `sdd-session-start` (`PreInvocation`) | Injeta automaticamente a memória viva (`11-project-memory.md`), avisos de paginação elástica (`-02.md`) e status de tasks (`07-tasks.md`) no início de cada sessão (P11). |
+| `hooks.json` | `sdd-session-start` (`PreInvocation`) · `sdd-say-do-record` (`PostToolUse`) | O primeiro injeta automaticamente a memória viva (`11-project-memory.md`), a raiz do plugin (resolve `<raiz-do-plugin>` nas skills), avisos de paginação elástica (`-02.md`, gatilho de 150 linhas ou de caracteres), tasks ativas (`07-tasks.md`) e changes ativas no início de cada invocação (P11). O segundo registra passivamente edições de arquivo e comandos de terminal no ledger do Say-Do Gate. |
 | `templates/` | Templates completos para Constitution, `GEMINI.md`, `specs/00..11` (incluindo `11-project-memory.md`), `changes/` e `archive/`. | Esqueletos que as skills copiam e adaptam na estrutura canônica flat `docs/sdd/`. |
-| `scripts/` | `session-start.mjs`, `check-ids.mjs` | Automações determinísticas de contexto e validação mecânica de rastreabilidade de IDs. |
+| `scripts/` | `session-start.mjs`, `check-ids.mjs`, `say-do-record.mjs`, `say-do-audit.mjs`, `say-do-lib.mjs` | Automações determinísticas de contexto, validação mecânica de rastreabilidade de IDs e Say-Do Gate (ledger de execução fora do repositório, na pasta temporária do SO). |
 
 ---
 
@@ -136,9 +136,23 @@ Ao concluir um milestone ou tarefa:
 > *"Valide a implementação recente com sdd-validate"*
 
 O Gate opera em 3 camadas estritamente passivas (`read-only`):
-1. **Camada 0 (Piso Mecânico):** Executa `scripts/check-ids.mjs` e confirma execução real dos testes.
+1. **Camada 0 (Piso Mecânico):** Executa `scripts/check-ids.mjs` (IDs órfãos) e `scripts/say-do-audit.mjs` (*Say-Do Gate*: comprova, pelo ledger do hook `PostToolUse`, que os testes rodaram com `exit code 0` após a última edição de código). Sem evidência não há aprovação, e com a Camada 0 falhando o validador não é acionado.
 2. **Camada 1 (Estágio 1 do `sdd-validator`):** Audita conformidade cláusula a cláusula com as especificações GEARS e ausência de escopo inventado.
 3. **Camada 2 (Estágio 2 do `sdd-validator`):** Audita qualidade, `constitution.md` e infraestrutura global, alimentando `docs/sdd/10-validation.md` (com paginação elástica `10-validation-02.md` quando necessário).
+
+---
+
+## Orçamento de injeção de contexto (premissa não confirmada)
+
+A documentação do Antigravity não publica um limite para o contexto injetado por hooks. Como outras plataformas agênticas cortam em 10.000 caracteres, **este plugin assume o mesmo limite**, somando todos os `injectSteps` de uma invocação. **Essa limitação é uma previsão nossa e não foi confirmada pelos desenvolvedores do Antigravity**; se um limite oficial for publicado, o orçamento em `scripts/session-start.mjs` (`INJECTION_BUDGET`) e o gatilho da memória devem ser revistos.
+
+O hook de início de sessão nunca depende desse corte. Ele monta a injeção por prioridade, dentro de **10.000 caracteres**:
+
+1. alertas de paginação, shards `-02.md`, tasks ativas (até 15, títulos com até 80 caracteres) e changes ativas (até 10) — juntos, no máximo cerca de 3.000 caracteres;
+2. o `11-project-memory.md` **inteiro**, se couber no que sobrou;
+3. se não couber: só as seções **Estado Atual**, **Próximos Passos Imediatos** e **Pendências em Aberto**, precedidas do aviso `MEMÓRIA INCOMPLETA NESTA INJEÇÃO`, que manda o agente ler o arquivo inteiro antes de agir e aplicar a higiene (rotação ou shard `-02.md`).
+
+Por isso o gatilho de paginação da memória neste plugin é **150 linhas ou 7.000 caracteres** (10.000 menos a reserva de ~3.000). O `10-validation.md` não é injetado (o hook só cita os shards) e segue o gatilho canônico de 150 linhas ou 16.000 caracteres. A `constitution.md` não é injetada por hook: o agente a lê inteira com a ferramenta de leitura, sem limite.
 
 ---
 

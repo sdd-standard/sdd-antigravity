@@ -23,8 +23,8 @@ Esta skill guia a captura estruturada de intenção e a formalização de requis
    - **a.** Resuma seu entendimento do contexto atual.
    - **b.** Conduza a entrevista enxuta de lacunas e pontos cegos (segurança, LGPD, NFRs, RTO/RPO, casos de falha).
    - **c.** Gere o artefato em `docs/sdd/`.
-3. Valide cada artefato com o usuário antes de avançar (`Status: Draft → Reviewed → Approved`).
-4. Ao concluir cada artefato, submeta ao check passivo do `sdd-validator` e atualize `docs/sdd/11-project-memory.md` (respeitando o teto de 150 linhas e paginação elástica `-02.md`).
+3. Valide cada artefato com o usuário antes de avançar (`Status: Draft → Reviewed → Approved`). Só o usuário promove o `Status` do artefato (pode aprovar vários de uma vez); ao pedir a aprovação, liste os itens `Auto-Approved` e o `Motivo:` de cada um. Se avançar com a base em `Reviewed` (ainda não `Approved`), registre a dívida de maturidade (`Type: Maturity`) no `10-validation.md` com o snapshot dos IDs e do texto consumidos.
+4. Ao concluir cada artefato, submeta ao check passivo do `sdd-validator` e atualize `docs/sdd/11-project-memory.md` (respeitando o gatilho de paginação (150 linhas ou 7.000 caracteres) e paginação elástica `-02.md`).
 
 ## Regras de sintaxe:
 - **Intent Blocks** no `02-spec.md`: captura o PORQUÊ (`Goal / Expectation / Action / Result`).

@@ -10,9 +10,10 @@ Esta skill inicia o workflow **Spec-Driven Development (SDD Puro v2.1)** do zero
 ## Passos:
 1. **Verificação Inicial**: Confirme que `docs/sdd/` ainda não existe (se já existir, pare e oriente usar `sdd-adopt` ou continuar de onde parou).
 2. **Entrevista Concisa da Constitution (Baixa Fricção)**:
-   - Faça uma entrevista enxuta e direta com o usuário (máx. 3 a 5 perguntas agrupadas com recomendações padrão) para entender as diretrizes arquiteturais, stack tecnológica, regras de linting, política de testes e modelos do ambiente que formarão a **Constitution**.
+   - Faça uma entrevista enxuta e direta com o usuário (máx. 3 a 5 perguntas agrupadas com recomendações padrão) para entender as diretrizes arquiteturais, stack tecnológica, regras de linting, política de testes (incluindo o comando oficial de verificação usado pelo *Say-Do Gate*) e modelos do ambiente que formarão a **Constitution**.
+   - Inclua obrigatoriamente a **Calibração de criticidade do domínio** (seção 6 da Constitution): o que, neste negócio, eleva um achado automaticamente para `Critical` ou `High` (ex.: precisão financeira, PII/LGPD, auditoria regulatória, contrato de API pública) e o que é tolerado como `Medium`/`Low` nesta fase.
 3. **Criação da Árvore Canônica Flat (`docs/sdd/`)**:
-   Copie os templates do plugin (`templates/specs/*` → `docs/sdd/` e `templates/archive/*` → `docs/sdd/archive/`) na raiz do workspace:
+   Copie os templates do plugin (`templates/specs/*` → `docs/sdd/` e `templates/archive/*` → `docs/sdd/archive/`) na raiz do workspace. Todo caminho `templates/...` desta skill é relativo à `<raiz-do-plugin>`, informada pelo hook do plugin no início de cada turno (linha `SDD: raiz do plugin sdd-workflow = ...`):
    - `docs/sdd/constitution.md` — baseado na entrevista (`templates/constitution.md.template`) e nos princípios P1 a P11.
    - `docs/sdd/00-project-brief.md` a `docs/sdd/09-traceability.md` — esqueletos canônicos (a partir de `templates/specs/`).
    - `docs/sdd/07-tasks.md` — ledger de execução inicial (vazio).
