@@ -167,7 +167,7 @@ async function main() {
       const shown = active.slice(0, MAX_TASKS).map(t => `- ${t.id} [${t.status}] ${clip(t.title || '(sem título)', MAX_TITLE)}`);
       const more = active.length > MAX_TASKS ? `\n(+${active.length - MAX_TASKS} não exibidas)` : '';
       fixedSteps.push({
-        ephemeralMessage: `SDD Context: Tasks não concluídas (${active.length}):\n${shown.join('\n')}${more}\n\nSiga o protocolo: confirme estado e próximo passo em até 5 linhas antes de agir.`
+        ephemeralMessage: `SDD Context: Tasks não concluídas (${active.length}):\n${shown.join('\n')}${more}\n\nSiga o protocolo: confirme estado e próximo passo em até 5 linhas e prossiga com o pedido do usuário no mesmo turno (a confirmação não substitui a ação).`
       });
     }
   }
