@@ -13,13 +13,15 @@
  *   2  NO_EVIDENCE           ledger vazio — NÃO é aprovação: rode os testes e re-audite
  */
 import { auditEvents, findProjectRoot, ledgerPath, readEvents } from "./say-do-lib.mjs";
+import { resolvePendingExitCodes } from "./transcript-exit.mjs";
 
 const args = process.argv.slice(2);
 const asJson = args.includes("--json");
 const start = args.find((a) => !a.startsWith("--")) ?? process.cwd();
 const root = findProjectRoot(start) ?? start;
 
-const report = { ...auditEvents(readEvents(root)), projectRoot: root, ledger: ledgerPath(root) };
+// Antigravity: exit codes pendentes no momento do hook são resolvidos agora, pelo transcript.
+const report = { ...auditEvents(resolvePendingExitCodes(readEvents(root))), projectRoot: root, ledger: ledgerPath(root) };
 
 if (asJson) {
   console.log(JSON.stringify(report, null, 2));

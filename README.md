@@ -32,6 +32,8 @@ O **SDD Puro v2.1** canaliza o poder do Gemini em torno de artefatos vivos e ver
 
 O Antigravity suporta plugins tanto em nível de **workspace (projeto)** quanto em nível **global (usuário)**.
 
+> **Validado no Antigravity IDE 2.7.0 (Windows):** a **Opção B (global)** — o IDE carregou o plugin, executou os hooks `PreInvocation` e `PostToolUse` e o Say-Do Gate funcionou de ponta a ponta. As opções A e C ainda não foram verificadas no IDE.
+
 ### Opção A — Instalação por Workspace (Recomendado para times / versionado)
 Adicione o plugin dentro da pasta `.agents/plugins/sdd-workflow` na raiz do seu projeto:
 
@@ -90,7 +92,7 @@ Você também pode declarar o plugin explicitamente no arquivo `.agents/plugins.
 | `agents/` (3) | `sdd-architect/`, `sdd-validator/`, `sdd-doc-writer/` | Architect: especificação, entrevista escopada e design. Validator: auditor 100% passivo (`read-only`) em 2 estágios. Doc-writer: redator de README e docs de features. |
 | `hooks.json` | `sdd-session-start` (`PreInvocation`) · `sdd-say-do-record` (`PostToolUse`) | O primeiro injeta automaticamente a memória viva (`11-project-memory.md`), a raiz do plugin (resolve `<raiz-do-plugin>` nas skills), avisos de paginação elástica (`-02.md`, gatilho de 150 linhas ou de caracteres), tasks ativas (`07-tasks.md`) e changes ativas no início de cada invocação (P11). O segundo registra passivamente edições de arquivo e comandos de terminal no ledger do Say-Do Gate. |
 | `templates/` | Templates completos para Constitution, `GEMINI.md`, `specs/00..11` (incluindo `11-project-memory.md`), `changes/` e `archive/`. | Esqueletos que as skills copiam e adaptam na estrutura canônica flat `docs/sdd/`. |
-| `scripts/` | `session-start.mjs`, `check-ids.mjs`, `say-do-record.mjs`, `say-do-audit.mjs`, `say-do-lib.mjs` | Automações determinísticas de contexto, validação mecânica de rastreabilidade de IDs e Say-Do Gate (ledger de execução fora do repositório, na pasta temporária do SO). |
+| `scripts/` | `session-start.mjs`, `check-ids.mjs`, `say-do-record.mjs`, `say-do-audit.mjs`, `say-do-lib.mjs`, `transcript-exit.mjs` | Automações determinísticas de contexto, validação mecânica de rastreabilidade de IDs e Say-Do Gate (ledger de execução fora do repositório, na pasta temporária do SO). |
 
 ---
 
@@ -139,6 +141,18 @@ O Gate opera em 3 camadas estritamente passivas (`read-only`):
 1. **Camada 0 (Piso Mecânico):** Executa `scripts/check-ids.mjs` (IDs órfãos) e `scripts/say-do-audit.mjs` (*Say-Do Gate*: comprova, pelo ledger do hook `PostToolUse`, que os testes rodaram com `exit code 0` após a última edição de código). Sem evidência não há aprovação, e com a Camada 0 falhando o validador não é acionado.
 2. **Camada 1 (Estágio 1 do `sdd-validator`):** Audita conformidade cláusula a cláusula com as especificações GEARS e ausência de escopo inventado.
 3. **Camada 2 (Estágio 2 do `sdd-validator`):** Audita qualidade, `constitution.md` e infraestrutura global, alimentando `docs/sdd/10-validation.md` (com paginação elástica `10-validation-02.md` quando necessário).
+
+---
+
+## Say-Do Gate no Antigravity IDE (comportamento validado na 2.7.0)
+
+O teste real no IDE mostrou três particularidades da plataforma, já tratadas pelo plugin:
+
+1. **O exit code não vem no payload.** O `PostToolUse` de um `run_command` chega com `error` vazio mesmo quando o comando sai com código 1. O código real só aparece no transcript da conversa (`transcriptPath`), no passo `stepIdx` (`Command exited with code N.`).
+2. **O transcript é gravado depois do hook.** No momento em que o `PostToolUse` dispara, esse passo ainda não existe. Por isso `say-do-record.mjs` grava o comando com o exit code **pendente** (`transcriptPath` + `stepIdx`) e `say-do-audit.mjs` resolve o código na hora da auditoria (`transcript-exit.mjs`). Sem o passo, ou com o comando em background, o código fica **indeterminado e nunca conta como prova** (fail-closed).
+3. **Nomes das ferramentas na 2.x:** `write_file` e `edit_file` (argumento `Path`) e `run_command` (`CommandLine`); os nomes antigos (`write_to_file`, `replace_file_content`) continuam aceitos. O hook roda com o diretório do próprio `hooks.json` como diretório de trabalho, então os caminhos `./scripts/...` resolvem dentro do plugin.
+
+Rode a suíte de testes do gate de forma **síncrona** (aguardando o comando terminar): um comando que vai para background não registra exit code.
 
 ---
 

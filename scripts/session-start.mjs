@@ -121,6 +121,13 @@ async function main() {
   }
 
   const workspace = input.workspacePaths?.[0] || process.cwd();
+  // O PreInvocation dispara antes de CADA chamada ao modelo (inclusive no meio de um turno, após cada
+  // ferramenta). O estado é reinjetado sempre (ephemeralMessage não persiste), mas a instrução de
+  // confirmar o estado só vai na primeira chamada da conversa — senão o modelo repete o status em toda resposta.
+  const firstOfConversation = (input.invocationNum ?? 0) === 0 && (input.initialNumSteps ?? 0) <= 1;
+  const protocolLine = firstOfConversation
+    ? '\n\nSiga o protocolo: confirme estado e próximo passo em até 5 linhas e prossiga com o pedido do usuário no mesmo turno (a confirmação não substitui a ação).'
+    : '';
 
   // Raiz do plugin: emitida mesmo sem `docs/sdd/` porque `sdd-init`/`sdd-adopt` precisam dela
   // para copiar os templates antes de a árvore existir.
@@ -167,7 +174,7 @@ async function main() {
       const shown = active.slice(0, MAX_TASKS).map(t => `- ${t.id} [${t.status}] ${clip(t.title || '(sem título)', MAX_TITLE)}`);
       const more = active.length > MAX_TASKS ? `\n(+${active.length - MAX_TASKS} não exibidas)` : '';
       fixedSteps.push({
-        ephemeralMessage: `SDD Context: Tasks não concluídas (${active.length}):\n${shown.join('\n')}${more}\n\nSiga o protocolo: confirme estado e próximo passo em até 5 linhas e prossiga com o pedido do usuário no mesmo turno (a confirmação não substitui a ação).`
+        ephemeralMessage: `SDD Context: Tasks não concluídas (${active.length}):\n${shown.join('\n')}${more}${protocolLine}`
       });
     }
   }
