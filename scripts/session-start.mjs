@@ -34,11 +34,25 @@ async function main() {
   if (fs.existsSync(memoryPath)) {
     const memory = fs.readFileSync(memoryPath, 'utf8');
     injectSteps.push({
-      ephemeralMessage: "SDD Context: Memory state loaded:\n```markdown\n" + memory + "\n```"
+      ephemeralMessage: "SDD Context: Memory state loaded (`docs/sdd/11-project-memory.md`):\n```markdown\n" + memory + "\n```"
     });
   }
 
-  // Camada 1: Tasks — filtered to active only (Pending/In Progress/Blocked), max 15
+  // Camada 1b: Detecção de Paginação Elástica (Overflow Shards -02.md, -03.md)
+  try {
+    const entries = fs.readdirSync(sddRoot);
+    const overflowFiles = entries
+      .filter(name => /-0[2-9]\.md$/i.test(name))
+      .sort();
+    if (overflowFiles.length > 0) {
+      const listStr = overflowFiles.map(f => `\`docs/sdd/${f}\``).join(', ');
+      injectSteps.push({
+        ephemeralMessage: `SDD Context — Paginação Elástica Ativa: Existem arquivos complementares de memória/dívida (${listStr}). Consulte-os sob demanda se a tarefa atual tocar nos escopos indicados no cabeçalho principal.`
+      });
+    }
+  } catch {}
+
+  // Camada 1c: Tasks — filtered to active only (Pending/In Progress/Blocked), max 15
   // Token-efficient: does NOT load changes/*/tasks.md (those are loaded on-demand by skills)
   if (fs.existsSync(tasksPath)) {
     const tasks = fs.readFileSync(tasksPath, 'utf8');
@@ -46,7 +60,7 @@ async function main() {
     const active = blocks
       .filter(b => /Status:\s*(Pending|In Progress|Blocked)/i.test(b))
       .map(b => {
-        const id = b.match(/TASK-\d+/)?.[0] || '?';
+        const id = b.match(/TASK-[A-Za-z0-9_-]+/)?.[0] || '?';
         const title = b.match(/Title:\s*(.+)/)?.[1]?.trim() || '?';
         const status = b.match(/Status:\s*(.+)/)?.[1]?.trim() || '?';
         return `- ${id} [${status}] ${title}`;

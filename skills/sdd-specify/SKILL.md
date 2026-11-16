@@ -1,30 +1,34 @@
 ---
 name: sdd-specify
-description: Conduz as fases de especificação SDD (00→03) — Project Brief, Discovery, Spec (Intent Blocks) e Requirements (GEARS). Use após o bootstrap (sdd-init/sdd-adopt) para capturar e formalizar intenção e requisitos.
+description: Conduz as fases de especificação SDD (00→03) — Project Brief, Discovery, Spec (Intent Blocks) e Requirements (GEARS) — utilizando entrevista escopada de baixa fricção.
 ---
 
-# SDD Specify (Fases 00 a 03)
+# SDD Specify (Fases 00 a 03 — v2.1)
 
 Esta skill guia a captura estruturada de intenção e a formalização de requisitos, delegando ao agente `sdd-architect` quando disponível.
 
 ## Pré-condições:
 - `docs/sdd/constitution.md` deve existir. Se não existir, oriente o usuário a rodar `sdd-init` ou `sdd-adopt` primeiro.
-- Leia `11-project-memory.md` e verifique o estado dos artefatos 00–03 existentes.
+- Leia `11-project-memory.md` e verifique o estado dos artefatos `00` a `03` existentes.
+
+## Protocolo de Entrevista Escopada e Baixa Fricção:
+1. **Escopo Estrito de Leitura**: Se este `specify` estiver sendo executado para uma feature em um projeto existente, inspecione **apenas os arquivos do domínio/módulo relacionado à feature** (nunca leia o repositório inteiro).
+2. **Detecção de Escopo Excessivo (*Scope Slicing*)**: Se perceber que o escopo pedido pelo usuário abrange múltiplos domínios grandes de uma vez, proponha dividir em fases/milestones menores ou estreitar o escopo imediato e registrar o restante como escopo futuro em `10-validation.md` / `06-roadmap.md`.
+3. **Poucas Perguntas Cirúrgicas**: Faça no máximo **3 a 5 perguntas objetivas por vez**, sempre trazendo uma **opção recomendada** baseada na `constitution.md` para não burocratizar a experiência do usuário.
 
 ## Passos:
 1. Identifique a fase mais antiga incompleta, nesta ordem:
    - `00-project-brief.md` → `01-discovery.md` → `02-spec.md` → `03-requirements.md`
 2. Conduza **um artefato por vez**:
-   a. Resuma seu entendimento do contexto atual.
-   b. Liste lacunas e pontos não definidos.
-   c. Faça perguntas de descoberta (segurança, LGPD, NFRs, RTO/RPO sempre).
-   d. Gere o artefato em `docs/sdd/`.
-3. Valide cada artefato com o usuário antes de avançar (Status: `Draft → Reviewed → Approved`).
-4. Ao concluir cada artefato, atualize `docs/sdd/11-project-memory.md`.
+   - **a.** Resuma seu entendimento do contexto atual.
+   - **b.** Conduza a entrevista enxuta de lacunas e pontos cegos (segurança, LGPD, NFRs, RTO/RPO, casos de falha).
+   - **c.** Gere o artefato em `docs/sdd/`.
+3. Valide cada artefato com o usuário antes de avançar (`Status: Draft → Reviewed → Approved`).
+4. Ao concluir cada artefato, submeta ao check passivo do `sdd-validator` e atualize `docs/sdd/11-project-memory.md` (respeitando o teto de 150 linhas e paginação elástica `-02.md`).
 
 ## Regras de sintaxe:
-- **Intent Blocks** no `02-spec.md`: captura o PORQUÊ (Goal / Expectation / Action / Result).
-- **GEARS** no `03-requirements.md`: formaliza O QUE (keywords `Where`/`While`/`When`/`shall` em inglês).
+- **Intent Blocks** no `02-spec.md`: captura o PORQUÊ (`Goal / Expectation / Action / Result`).
+- **GEARS** no `03-requirements.md`: formaliza O QUE (keywords `Where`/`While`/`When`/`shall` **sempre em inglês**):
   - `Where` = pré-condição estática (ambiente, flag, configuração).
   - `While` = pré-condição dinâmica de estado (runtime).
   - `When` = gatilho ou evento de entrada.
@@ -32,4 +36,4 @@ Esta skill guia a captura estruturada de intenção e a formalização de requis
 - Termos vagos viram métrica: "rápido" → tempo, "seguro" → mecanismo, "disponível" → SLA.
 
 ## Próximo passo:
-Ao concluir `03-requirements.md`, oriente o usuário a usar a skill `sdd-design` para as fases 04→06.
+Ao concluir `03-requirements.md`, oriente o usuário a usar a skill `sdd-design` para as fases `04` a `06`.

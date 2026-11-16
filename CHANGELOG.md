@@ -4,6 +4,20 @@ All notable changes to sdd-antigravity will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.3.0] - 2026-11-15
+
+### Added
+- **Pure SDD Standard v2.1 alignment**:
+  - **Pre-Design `Validate-Gap` Check (`DÍVIDA-SDD-02`)**: Integrated into `sdd-design` and `sdd-change` for brownfield domain comparison before creating `DES-xxx` decisions.
+  - **3-Layer 100% Passive Quality Gate (`DÍVIDA-SDD-01` & `DÍVIDA-SDD-03`)**: Unified milestone gate combining Layer 0 mechanical checks (`check-ids.mjs` + test execution evidence) with a two-stage passive `sdd-validator` report (`Stage 1: Strict GEARS & Scope Compliance` → `Stage 2: Constitution, Security & Global Infra Quality`).
+  - **Scoped Low-Friction Interview & Proactive Scope Slicing (`DÍVIDA-SDD-05`)**: `sdd-architect`, `sdd-specify`, and `sdd-change` restrict code reading strictly to the touched domain, ask at most 3–5 focused questions with recommended defaults, and proactively propose splitting or narrowing oversized changes.
+  - **Elastic Pagination with Auto-Compaction (`-02.md` — `DÍVIDA-SDD-06`)**: Enforces the 150-line file cap + 4–5 line paragraph density limit while supporting `10-validation-02.md` and `11-project-memory-02.md` overflow shards that are automatically detected by `scripts/session-start.mjs`, linked in the main header, and deleted once debts/active fronts are resolved.
+  - **Deterministic Severity Taxonomy & Domain Calibration (`DÍVIDA-SDD-07`)**: Embeds the Universal SDD Severity Matrix (`Critical | High | Medium | Low`) inline in `rules/sdd-core-rules.md`, `GEMINI.md.template`, `agents/sdd-validator/system_prompt.md`, and `templates/specs/10-validation.md`, paired with project-specific risk calibration in `templates/constitution.md.template`.
+
+### Changed
+- **Unified `templates/specs/00..11` folder**: Moved `templates/11-project-memory.md` into `templates/specs/11-project-memory.md` so all 12 numbered canonical artifacts reside together and map cleanly to the flat `docs/sdd/` directory.
+- `plugin.json` version bumped to `1.3.0`.
+
 ## [1.2.0] - 2026-09-17
 
 ### Changed
